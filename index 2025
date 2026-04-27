@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pengumuman Kelulusan - SMP Negeri 3 Pekanbaru</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #1d4ed8;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    header img {
+      height: 80px;
+      margin-bottom: 10px;
+    }
+    main {
+      padding: 30px 20px;
+      text-align: center;
+    }
+    input[type="text"] {
+      padding: 10px;
+      width: 250px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+    .result {
+      margin-top: 30px;
+      font-size: 18px;
+    }
+    .lulus {
+      color: green;
+      font-weight: bold;
+      animation: blink 1s infinite;
+    }
+    .tidaklulus {
+      color: red;
+      font-weight: bold;
+    }
+    footer {
+      background: #e2e8f0;
+      text-align: center;
+      padding: 15px;
+      font-size: 14px;
+      margin-top: 40px;
+      color: #444;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1 }
+      50% { opacity: 0 }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="https://raw.githubusercontent.com/efendibinselim/PENGUMUMAN-KELULUSAN/refs/heads/main/logosmpn3pku%20png.png" alt="Logo Sekolah">
+    <h1>Pengumuman Kelulusan</h1>
+    <h2>SMP Negeri 3 Pekanbaru<br>Tahun Pelajaran 2024/2025</h2>
+  </header>
+
+  <main>
+    <p>Masukkan NISN untuk melihat hasil kelulusan:</p>
+    <input type="text" id="nisnInput" placeholder="Masukkan NISN">
+    <button onclick="cekKelulusan()">Cek</button>
+    <div class="result" id="hasil"></div>
+  </main>
+
+  <footer>
+    &copy; 2025 SMP Negeri 3 Pekanbaru - Jl. Dahlia No. 102
+  </footer>
+
+  <script>
+    const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTmYmAHiziiHN0dommjcgXUQ1WUIMTIlAxRB_EViZAjUwHIaZxXRV8zWvn7dEnD3FjbLDzN95SPoeOB/pub?output=csv";
+
+    let dataSiswa = [];
+
+    fetch(sheetURL)
+      .then(res => res.text())
+      .then(csv => {
+        const rows = csv.split('\n').slice(1);
+        dataSiswa = rows.map(row => {
+          const cols = row.split(',');
+          return {
+            nisn: cols[1]?.trim(),
+            nama: cols[2],
+            tempat: cols[3],
+            tanggal: cols[4],
+            status: cols[5]?.trim()
+          };
+        });
+      });
+
+    function cekKelulusan() {
+      const input = document.getElementById("nisnInput").value.trim();
+      const hasil = document.getElementById("hasil");
+
+      if (input === "") {
+        hasil.innerHTML = "Silakan masukkan NISN.";
+        return;
+      }
+
+      const siswa = dataSiswa.find(d => d.nisn === input);
+
+      if (siswa) {
+        if (siswa.status.toUpperCase() === "LULUS") {
+          hasil.innerHTML = `
+            <p>Nama: <strong>${siswa.nama}</strong></p>
+            <p>Tempat, Tanggal Lahir: ${siswa.tempat}, ${siswa.tanggal}</p>
+            <p class="lulus">🎉 SELAMAT! ANDA DINYATAKAN LULUS 🎉</p>
+          `;
+          showConfetti();
+        } else {
+          hasil.innerHTML = `
+            <p>Nama: <strong>${siswa.nama}</strong></p>
+            <p>Tempat, Tanggal Lahir: ${siswa.tempat}, ${siswa.tanggal}</p>
+            <p class="tidaklulus">Mohon Maaf, Anda Belum  Lulus.</p>
+          `;
+        }
+      } else {
+        hasil.innerHTML = "NISN tidak ditemukan.";
+      }
+    }
+
+    function showConfetti() {
+      const duration = 2 * 1000;
+      const animationEnd = Date.now() + duration;
+      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 1000 };
+
+      function randomInRange(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+
+      const interval = setInterval(function() {
+        if (Date.now() > animationEnd) return clearInterval(interval);
+        confetti({
+          particleCount: 50,
+          origin: {
+            x: randomInRange(0.1, 0.9),
+            y: Math.random() - 0.2
+          },
+          ...defaults
+        });
+      }, 250);
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</body>
+</html>
