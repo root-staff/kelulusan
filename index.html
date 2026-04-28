@@ -23,41 +23,45 @@
     .timer-label { display: block; font-size: 12px; color: #666; text-transform: uppercase; }
     
     /* Form Style */
-    input[type="text"] { padding: 12px; width: 200px; border: 1px solid #ccc; border-radius: 6px; }
-    button { padding: 12px 24px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-    .hidden { display: none !important; }
+    #form-kelulusan { margin-top: 20px; }
+    input[type="text"] { padding: 12px; width: 200px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
+    button { padding: 12px 24px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; margin-left: 10px; }
     
-    .result { margin-top: 30px; font-size: 18px; }
+    .hidden { display: none !important; }
+    .result { margin-top: 30px; font-size: 18px; line-height: 1.6; }
     .lulus { color: green; font-weight: bold; animation: blink 1s infinite; }
     .tidaklulus { color: red; font-weight: bold; }
+    
     footer { margin-top: 50px; padding: 20px; background: #e2e8f0; color: #444; font-size: 13px; }
-    @keyframes blink { 50% { opacity: 0; } }
+    @keyframes blink { 0%, 100% { opacity: 1 } 50% { opacity: 0 } }
   </style>
 </head>
 <body>
 
   <header>
-    <img src="https://raw.githubusercontent.com/efendibinselim/PENGUMUMAN-KELULUSAN/refs/heads/main/logosmpn3pku%20png.png" alt="Logo">
+    <img src="https://raw.githubusercontent.com/efendibinselim/PENGUMUMAN-KELULUSAN/refs/heads/main/logosmpn3pku%20png.png" alt="Logo Sekolah">
     <h1>Pengumuman Kelulusan</h1>
-    <h2>SMP Negeri 3 Pekanbaru <br> TP 2025/2026</h2>
+    <h2>SMP Negeri 3 Pekanbaru<br>Tahun Pelajaran 2025/2026</h2>
   </header>
 
   <main>
     <div id="timer-container">
-      <p id="timer-status">Menunggu Waktu Pengumuman:</p>
-      <div class="timer-unit"><span id="days">00</span><span class="timer-label">Hari</span></div>
-      <div class="timer-unit"><span id="hours">00</span><span class="timer-label">Jam</span></div>
-      <div class="timer-unit"><span id="minutes">00</span><span class="timer-label">Menit</span></div>
-      <div class="timer-unit"><span id="seconds">00</span><span class="timer-label">Detik</span></div>
+      <p>Pengumuman akan dibuka dalam:</p>
+      <div id="countdown">
+        <div class="timer-unit"><span id="days">00</span><span class="timer-label">Hari</span></div>
+        <div class="timer-unit"><span id="hours">00</span><span class="timer-label">Jam</span></div>
+        <div class="timer-unit"><span id="minutes">00</span><span class="timer-label">Menit</span></div>
+        <div class="timer-unit"><span id="seconds">00</span><span class="timer-label">Detik</span></div>
+      </div>
     </div>
 
     <div id="form-kelulusan" class="hidden">
-      <p>Silakan masukkan NISN Anda:</p>
-      <input type="text" id="nisnInput" placeholder="Contoh: 0081234567">
-      <button onclick="cekKelulusan()">LIHAT HASIL</button>
+      <p>Masukkan NISN untuk melihat hasil kelulusan:</p>
+      <input type="text" id="nisnInput" placeholder="Masukkan NISN">
+      <button onclick="cekKelulusan()">Cek</button>
     </div>
 
-    <div id="hasil" class="result"></div>
+    <div class="result" id="hasil"></div>
   </main>
 
   <footer>
@@ -67,89 +71,108 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <script>
-    // --- 1. SETING WAKTU TARGET ---
-    // Pastikan formatnya benar: TAHUN-BULAN-TANGGAL T JAM:MENIT:DETIK+07:00
-    const targetWaktu = new Date("2026-03-10T10:00:00+07:00").getTime();
+    // 1. PENGATURAN WAKTU TARGET (GMT+7)
+    const targetDate = new Date("2026-06-10T10:00:00+07:00").getTime();
 
     function updateTimer() {
-      const sekarang = new Date().getTime();
-      const selisih = targetWaktu - sekarang;
+      const now = new Date().getTime();
+      const distance = targetDate - now;
 
-      if (selisih <= 0) {
-        // Jika waktu sudah habis/lewat
+      if (distance <= 0) {
         document.getElementById("timer-container").classList.add("hidden");
         document.getElementById("form-kelulusan").classList.remove("hidden");
         return;
       }
 
-      // Hitung angka
-      const d = Math.floor(selisih / (1000 * 60 * 60 * 24));
-      const h = Math.floor((selisih % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const m = Math.floor((selisih % (1000 * 60 * 60)) / (1000 * 60));
-      const s = Math.floor((selisih % (1000 * 60)) / 1000);
+      const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const s = Math.floor((distance % (1000 * 60)) / 1000);
 
-      // Tampilkan ke layar
       document.getElementById("days").innerText = String(d).padStart(2, '0');
       document.getElementById("hours").innerText = String(h).padStart(2, '0');
       document.getElementById("minutes").innerText = String(m).padStart(2, '0');
       document.getElementById("seconds").innerText = String(s).padStart(2, '0');
     }
 
-    // Jalankan timer tiap 1 detik
     setInterval(updateTimer, 1000);
-    updateTimer(); // Jalankan sekali di awal agar tidak delay 1 detik
+    updateTimer();
 
-    // --- 2. LOGIKA DATA SISWA ---
-    const urlDatabase = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTlOAf-YkKZAjTd7dpK49JinaQyppe3GWonVcKqewsJxboPYAOkqT2QG9-HOgx8hDs0DItwRHCA6w24/pub?output=csv";
-    let listSiswa = [];
+    // 2. AMBIL DATA DARI GOOGLE SHEETS
+    const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTlOAf-YkKZAjTd7dpK49JinaQyppe3GWonVcKqewsJxboPYAOkqT2QG9-HOgx8hDs0DItwRHCA6w24/pub?output=csv";
+    let dataSiswa = [];
 
-    fetch(urlDatabase)
+    fetch(sheetURL)
       .then(res => res.text())
       .then(csv => {
-        const baris = csv.split('\n').slice(1);
-        listSiswa = baris.map(item => {
-          const kolom = item.split(',');
+        const rows = csv.split('\n').slice(1);
+        dataSiswa = rows.map(row => {
+          const cols = row.split(',');
           return {
-            nisn: kolom[1]?.trim(),
-            nama: kolom[2],
-            tempat: kolom[3],
-            tanggal: kolom[4],
-            status: kolom[5]?.trim()
+            nisn: cols[1]?.trim(),
+            nama: cols[2],
+            tempat: cols[3],
+            tanggal: cols[4],
+            status: cols[5]?.trim()
           };
         });
       });
 
-      function cekKelulusan() {
-        const inputVal = document.getElementById("nisnInput").value.trim();
-        const display = document.getElementById("hasil");
-        
-        if (!inputVal) {
-          display.innerHTML = "Silakan masukkan NISN.";
-          return;
-        }
-      
-        const mhs = listSiswa.find(s => s.nisn === inputVal);
-      
-        if (mhs) {
-          if (mhs.status.toUpperCase() === "LULUS") {
-            display.innerHTML = `
-              <p>Nama: <strong>${mhs.nama}</strong></p>
-              <p>Tempat, Tanggal Lahir: ${mhs.tempat}, ${mhs.tanggal}</p>
-              <p class="lulus">🎉 SELAMAT! ANDA DINYATAKAN LULUS 🎉</p>
-            `;
-            // Memanggil fungsi konfeti yang durasinya lebih lama
-            showConfetti(); 
-          } else {
-            display.innerHTML = `
-              <p>Nama: <strong>${mhs.nama}</strong></p>
-              <p>Tempat, Tanggal Lahir: ${mhs.tempat}, ${mhs.tanggal}</p>
-              <p class="tidaklulus">Mohon Maaf, Anda Belum Lulus.</p>
-            `;
-          }
-        } else {
-          display.innerHTML = "NISN tidak ditemukan. Pastikan nomor yang dimasukkan benar.";
-        }
+    // 3. FUNGSI CEK KELULUSAN
+    function cekKelulusan() {
+      const input = document.getElementById("nisnInput").value.trim();
+      const hasil = document.getElementById("hasil");
+
+      if (input === "") {
+        hasil.innerHTML = "Silakan masukkan NISN.";
+        return;
       }
+
+      // Mencari data siswa berdasarkan NISN
+      const siswa = dataSiswa.find(d => d.nisn === input);
+
+      if (siswa) {
+        if (siswa.status.toUpperCase() === "LULUS") {
+          hasil.innerHTML = `
+            <p>Nama: <strong>${siswa.nama}</strong></p>
+            <p>Tempat, Tanggal Lahir: ${siswa.tempat}, ${siswa.tanggal}</p>
+            <p class="lulus">🎉 SELAMAT! ANDA DINYATAKAN LULUS 🎉</p>
+          `;
+          showConfetti();
+        } else {
+          hasil.innerHTML = `
+            <p>Nama: <strong>${siswa.nama}</strong></p>
+            <p>Tempat, Tanggal Lahir: ${siswa.tempat}, ${siswa.tanggal}</p>
+            <p class="tidaklulus">Mohon Maaf, Anda Belum Lulus.</p>
+          `;
+        }
+      } else {
+        hasil.innerHTML = "NISN tidak ditemukan.";
+      }
+    }
+
+    // 4. EFEK KONFETI
+    function showConfetti() {
+      const duration = 2 * 1000;
+      const animationEnd = Date.now() + duration;
+      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 1000 };
+
+      function randomInRange(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+
+      const interval = setInterval(function() {
+        if (Date.now() > animationEnd) return clearInterval(interval);
+        confetti({
+          particleCount: 50,
+          origin: {
+            x: randomInRange(0.1, 0.9),
+            y: Math.random() - 0.2
+          },
+          ...defaults
+        });
+      }, 250);
+    }
   </script>
 </body>
 </html>
